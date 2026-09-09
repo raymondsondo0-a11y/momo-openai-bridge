@@ -1,4 +1,3 @@
-```python
 import os
 import requests
 from fastapi import FastAPI, Request, HTTPException
@@ -6,12 +5,8 @@ from openai import OpenAI
 
 app = FastAPI()
 
-# Secrets zitakuja kutoka Render Environment Variables
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 MOMO_API_TOKEN = os.getenv("MOMO_API_TOKEN")
-
-if not OPENAI_API_KEY or not MOMO_API_TOKEN:
-    print("WARNING: API keys are not configured yet.")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -29,7 +24,6 @@ async def momo_webhook(request: Request):
 
     print("MOMO WEBHOOK:", data)
 
-    # Tunataka incoming WhatsApp messages tu
     if data.get("event") != "message.received":
         return {"status": "ignored"}
 
@@ -40,12 +34,11 @@ async def momo_webhook(request: Request):
         return {"status": "ignored"}
 
     try:
-        # 1. Tuma ujumbe wa customer kwa OpenAI
         response = client.responses.create(
             model="gpt-5.6-luna",
             instructions=(
                 "You are a helpful WhatsApp customer service assistant. "
-                "Reply naturally, briefly, clearly and professionally. "
+                "Reply naturally, briefly and professionally. "
                 "Use the same language as the customer. "
                 "If the customer writes Swahili, reply in Swahili."
             ),
@@ -54,7 +47,6 @@ async def momo_webhook(request: Request):
 
         ai_reply = response.output_text.strip()
 
-        # 2. Tuma jibu kutoka OpenAI kurudi Momo
         headers = {
             "Authorization": f"Bearer {MOMO_API_TOKEN}",
             "Content-Type": "application/json"
@@ -92,4 +84,3 @@ async def momo_webhook(request: Request):
             status_code=500,
             detail="Bridge processing failed"
         )
-
