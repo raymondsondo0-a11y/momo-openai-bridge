@@ -4,3 +4,4 @@ requests
 openai
 google-genai
 cohere
+anthropic
